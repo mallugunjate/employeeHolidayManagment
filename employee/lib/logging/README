@@ -1,0 +1,75 @@
+See this document for how php logger works 
+
+http://www.indelible.org/php/Log/guide.html
+
+
+How to use logger?
+
+1) define following configuration variables in tnlconfig.php
+
+(a) LOG_LEVEL - defines severity level. Possible values are ( from highest to lowest priority )
+    
+    fatal - in case when system is unusable
+    error - error conditions 
+    warning - warning conditions 
+    info - informational messages 
+    debug - debug level messages
+
+    //special log level
+    off - if you do not want to log any thing 
+
+
+(b) LOG_FILE_DIR - where log files will be stored. Give proper write permissions to this directory otherwise logs will not be written
+
+(c) LOG_FILE_PREFIX - prefix for log file name. Log will be named in 'prefix_today's_date.log' format
+    
+        Example of (a), (b) & (c)
+
+            <?php
+            define('LOG_LEVEL', 'debug');
+            define('LOG_FILE_DIR', '/var/log/tnl/');
+            define('LOG_FILE_PREFIX', 'logging');
+
+2) include tnlconfig.php in moodle config.php so that it will be avilable in all classes and we do not have to include it separately
+
+3) Create logger instance (See api/tnl/logic.php for example)
+    
+    $logger = new logger(LOG_LEVEL, $ident, LOG_FILE_DIR, LOG_FILE_PREFIX);
+
+    LOG_LEVEL, LOG_FILE_DIR, LOG_FILE_PREFIX will be defined in tnlconfig.php
+    $ident -- identification string that will be logged in all log events. 
+              Examples can be from which file you are calling logger like "api", "homepage"
+
+
+4) Log events -
+
+    call any of these messages based on severity. See severity order in 1.(a)
+
+        $logger->fatal("fatal_error_message", "userid");
+        $logger->error("error_message", "userid");
+        $logger->warning("warning_message", "userid");
+        $logger->info("info_message", "userid");
+        $logger->debug("debug_message", "userid");
+
+
+/* ignore db logging for now 
+5) Log db calls exception - 
+    
+    We are now logging db call exceptions. Include this file to call db functions 
+    
+    <?php
+    require_once($CFG->dirroot . '/tnllib/db/db_functions.php');
+
+    db_functions.php is wrapper around moodle data manipluation API and includes logger also
+
+    call db functions like this (see api/tnl/logic.php for examples)
+
+    <?php
+    //create object of db functions
+
+      $dbobj = new db($userid); //$userid will be set in $USER for web call, if userid is available in request pass it 
+                                //otherwise just call new db()
+      $dbobj->insert_record(tablename, dataobject); //this will insert into database and also log exception if any
+*/
+
+There is one testcase also in testcases directory, run it to check if logging is working properly
